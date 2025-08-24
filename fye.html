@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Future Youths Education Test Center</title>
+  <!-- Header ထဲထည့်ထားသလိုပါပဲ -->
+<div class="header hidden" id="appHeader">
+  <div class="brand">
+    <div class="dot">FYE</div>
+    <span>Future Youths Education</span>
+  </div>
+  <div class="menu-wrapper">
+    <button id="menuBtn">☰</button>
+    <div id="menuDropdown" class="menu-dropdown hidden">
+      <a href="#" onclick="showPage('gradePage')">🏠 Home</a>
+      <a href="#" onclick="openProfile()">👤 Profile Setting</a>
+      <a href="#" onclick="openAppSetting()">⚙️ App Setting</a>
+      <a href="#" onclick="openVIP()">⭐ VIP Membership</a>
+      <a href="#" onclick="openPromo()">🎁 Promo Code</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- Popup Modal UI -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+  <style>
+    /* === Modern Test Center Theme ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+/* Modal overlay */
+/* === Modal Overlay === */
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(40, 30, 85, 0.7);  /* dark blur background */
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  animation: fadeIn .35s ease;
+}
+
+/* === Modal Box === */
+.modal-content {
+  background: rgba(14, 37, 130, 0.952);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 24px;
+  padding: 28px 26px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  animation: slideUp .4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* === Close Button === */
+.close-btn {
+  position: absolute;
+  top: 16px; right: 20px;
+  font-size: 22px;
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.close-btn:hover {
+  background: rgba(255,255,255,0.25);
+  transform: rotate(90deg);
+}
+
+/* === Animations === */
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to   {opacity: 1;}
+}
+@keyframes slideUp {
+  from {transform: translateY(60px) scale(0.95); opacity: 0;}
+  to   {transform: translateY(0) scale(1); opacity: 1;}
+}
+
+
+
+:root{
+  --bg: #0b1220;
+  --bg-2: #0e1630;
+  --card: rgba(255,255,255,0.08);
+  --card-solid: #0f1b37;
+  --text: #e8eeff;
+  --muted: #9fb0d6;
+  --brand: #4da7ff;
+  --brand-2: #7cc8ff;
+  --accent: #22d3ee;
+  --success: #34d399;
+  --danger: #ff6b6b;
+  --ring: rgba(77,167,255,.35);
+  --shadow: 0 20px 60px rgba(0,0,0,.35);
+  --radius: 18px;
+  --glass: blur(14px) saturate(140%);
+}
+
+/* Global */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 500px at -10% -20%, rgba(34,211,238,.18), transparent 60%),
+    radial-gradient(1200px 600px at 110% 20%, rgba(124,200,255,.18), transparent 60%),
+    linear-gradient(180deg, var(--bg), var(--bg-2) 50%, #0a1122);
+  letter-spacing:.2px;
+}
+
+/* Page containers */
+.page{
+  display:none;
+  min-height:100vh;
+  padding: clamp(24px, 4vw, 50px);
+}
+.active{display:block;}
+
+/* Headings */
+h1,h2{
+  margin:0 0 12px 0;
+  line-height:1.15;
+  font-weight:800;
+}
+h1{ font-size: clamp(28px, 4.6vw, 44px); }
+h2{ font-size: clamp(22px, 3.8vw, 32px); color: var(--brand-2); }
+
+/* Login card (glass) */
+.login-box{
+  width:min(420px, 92%);
+  margin: clamp(40px, 8vh, 120px) auto;
+  padding: 28px;
+  background: var(--card);
+  backdrop-filter: var(--glass);
+  border-radius: var(--radius);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow: var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+.login-box::after{
+  /* decorative glow sweep */
+  content:"";
+  position:absolute; inset:-30%;
+  background: conic-gradient(from 180deg at 50% 50%,
+    transparent 0 25%, rgba(77,167,255,.15) 35% 45%, transparent 55% 100%);
+  animation: spin 12s linear infinite;
+  filter: blur(18px);
+  z-index:-1;
+}
+@keyframes spin{ to{ transform: rotate(360deg);} }
+
+/* Inputs */
+input{
+  width:100%;
+  padding:14px 14px;
+  margin:10px 0;
+  color:var(--text);
+  background: #0c1936;
+  border:1px solid rgba(124,200,255,.28);
+  border-radius:14px;
+  outline:none;
+  transition:border-color .15s, box-shadow .15s, transform .05s;
+}
+input::placeholder{ color:#91a8d4; }
+input:focus{
+  border-color: var(--brand);
+  box-shadow: 0 0 0 6px var(--ring);
+}
+
+/* Buttons */
+button{
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:10px;
+  padding:13px 18px;
+  font-weight:800; letter-spacing:.3px;
+  color:#061023;
+  background: linear-gradient(180deg, var(--brand-2), var(--brand));
+  border:0; border-radius:14px; cursor:pointer;
+  box-shadow: 0 10px 30px rgba(77,167,255,.35);
+  transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
+}
+button:hover{ filter:saturate(120%); box-shadow: 0 16px 36px rgba(77,167,255,.45); }
+button:active{ transform: translateY(1px); }
+
+/* “secondary” ghost button (if you add any) */
+button.ghost{
+  background: transparent;
+  color: var(--brand-2);
+  border:1px solid rgba(124,200,255,.35);
+  box-shadow:none;
+}
+
+/* Grid (grades / subjects) */
+.grid{
+  display:grid;
+  gap:14px;
+  margin-top:22px;
+  grid-template-columns: repeat( auto-fit, minmax(150px, 1fr) );
+}
+
+/* Tiles */
+.box{
+  position:relative;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter: var(--glass);
+  color:var(--text);
+  padding: 20px 16px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+  isolation:isolate;
+}
+.box::after{
+  content:"→";
+  position:absolute; right:12px; bottom:10px;
+  color:#7cc8ff; font-weight:800; opacity:.9;
+}
+.box:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 16px 44px rgba(0,0,0,.35);
+  border-color: rgba(124,200,255,.45);
+  background: linear-gradient(180deg, rgba(124,200,255,.10), rgba(255,255,255,.03));
+}
+
+/* Completed subject (turn blue) */
+.completed{
+  background: linear-gradient(180deg, rgba(77,167,255,.45), rgba(77,167,255,.25)) !important;
+  border-color: rgba(124,200,255,.75) !important;
+  color:#041427 !important;
+  box-shadow: 0 16px 44px rgba(77,167,255,.45) !important;
+}
+.completed::after{ content:"✓"; color:#06203f; }
+
+/* Helper texts / errors */
+#loginError{
+  margin-top:10px;
+  color: #ffb4c1 !important;
+  font-weight:700;
+}
+
+/* Subject page layout */
+#subjectTitle{
+  margin-bottom:8px;
+  color:#d9e7ff;
+}
+#iframeWrap{
+  margin-top:18px;
+}
+iframe{
+  width:100%; height:min(70vh, 700px);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius: 16px;
+  background:#0b1328;
+  box-shadow: var(--shadow);
+}
+
+/* Top banner (optional—if you add a brand header later) */
+.header{
+  position:sticky; top:0; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 14px 20px;
+  background: linear-gradient(180deg, rgba(5,10,22,.85), rgba(5,10,22,.55));
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:800; color:#e8eeff;
+}
+.brand .dot{
+  width:36px; height:36px; border-radius:12px;
+  display:grid; place-items:center; font-weight:900;
+  color:#06203f; background: linear-gradient(180deg, var(--brand-2), var(--brand));
+  box-shadow: 0 8px 24px rgba(77,167,255,.35);
+}
+
+/* Fancy entrance anim */
+@keyframes fadeSlideUp{
+  from{ opacity:0; transform: translateY(10px); }
+  to{ opacity:1; transform: translateY(0); }
+}
+.page.active .login-box,
+.page.active h2,
+.page.active .grid .box{
+  animation: fadeSlideUp .4s ease both;
+}
+.page.active .grid .box:nth-child(odd){ animation-delay:.03s; }
+.page.active .grid .box:nth-child(even){ animation-delay:.08s; }
+
+/* Responsive tweaks */
+@media (max-width:560px){
+  .login-box{ padding:22px }
+  .grid{ gap:12px; }
+  .box{ padding:16px 14px; }
+  button{ width:100%; }
+}
+
+/* Optional: auto dark/light adapt using system setting (keeps same vibe) */
+@media (prefers-color-scheme: light){
+  :root{
+    --bg: #eef5ff;
+    --bg-2: #eaf2ff;
+    --card: rgba(255,255,255,.75);
+    --text: #0a1530;
+    --muted: #5a6c93;
+  }
+  body{
+    background:
+      radial-gradient(1200px 500px at -10% -20%, rgba(34,211,238,.15), transparent 60%),
+      radial-gradient(1200px 600px at 110% 20%, rgba(124,200,255,.15), transparent 60%),
+      linear-gradient(180deg, #eaf2ff, #f7fbff 60%, #e9f0ff);
+  }
+  .login-box{ border:1px solid rgba(9,18,40,.08); }
+  input{ background:#ffffff; color:#0a1530; }
+  .completed{ color:#06203f !important; }
+}
+/* === Result / Grade Card === */
+.result-card{
+  margin-top:18px;
+  padding:18px;
+  border:1px solid rgba(124,200,255,.35);
+  border-radius:14px;
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  color:#e8eeff;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.result-grid{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap:12px;
+}
+.result-chip{
+  display:flex; align-items:center; justify-content:center;
+  padding:10px 12px; border-radius:12px;
+  background:#0c1936; border:1px solid rgba(255,255,255,.14);
+  font-weight:800;
+}
+.result-chip.big{ font-size:22px; }
+.hidden{ display:none; }
+
+/* grade color hints */
+.grade-A{ background:#34d399 !important; color:#06203f; }
+.grade-B{ background:#60a5fa !important; color:#041427; }
+.grade-C{ background:#fbbf24 !important; color:#231a06; }
+.grade-D{ background:#f97316 !important; color:#2a0f04; }
+.grade-F{ background:#ef4444 !important; color:#2a0707; }
+
+body { overflow-x:hidden; }
+* { -webkit-tap-highlight-color:transparent; }
+
+
+  </style>
+</head>
+<body>
+  <!-- Login Page -->
+  <div id="loginPage" class="page active">
+    <div class="login-box">
+      <h1>Future Youths Education</h1>
+      <h2>Revolutionary High School</h2>
+      <h3>Login for your Exam </h3>
+      <input type="text" id="email" placeholder="Enter Gmail">
+      <input type="password" id="password" placeholder="Enter Password">
+      <button onclick="login()">Login</button>
+      <p id="loginError" style="color:red;display:none;">Invalid email or password!</p>
+    </div>
+  </div>
+
+  <!-- High Score Page -->
+  <div id="gradePage" class="page">
+    <h2>Choose Your Grade for the Exam</h2>
+    <div class="grid" id="gradeGrid"></div>
+  </div>
+
+  <!-- Subject Page -->
+  <div id="subjectPage" class="page">
+    <h2 id="subjectTitle"></h2>
+    <div class="grid" id="subjectGrid"></div>
+    <iframe id="formFrame" src=""></iframe>
+  </div>
+  <!-- Subject Page ထဲမှာရှိတဲ့ iframe အောက်နဲ့တစ်ခြား content ကြားထဲ ထည့်ပါ -->
+<div id="resultCard" class="result-card hidden">
+  <h3 style="margin:0 0 10px 0;">Result</h3>
+  <div class="result-grid">
+    <div class="result-chip"><span id="resSubject">Subject</span></div>
+    <div class="result-chip"><span id="resRaw">Score: --</span></div>
+    <div class="result-chip"><span id="resPct">Percent: --%</span></div>
+    <div class="result-chip big" id="resGrade">Grade: --</div>
+  </div>
+  <div style="margin-top:10px; opacity:.8;" id="resRemark"></div>
+</div>
+  
+
+<script>
+  // ===== User Session =====
+function login(){
+  const email = document.getElementById("email").value;
+  const pass  = document.getElementById("password").value;
+
+  if(email.endsWith("@gmail.com") && pass.trim() !== ""){
+    localStorage.setItem("userEmail", email);
+    document.getElementById("appHeader").classList.remove("hidden");
+    showPage("gradePage");
+  }else{
+    document.getElementById("loginError").style.display = "block";
+  }
+}
+window.onload = () => {
+  const user = localStorage.getItem("userEmail");
+  if(user){
+    document.getElementById("appHeader").classList.remove("hidden");
+    showPage("gradePage");
+  }
+};
+function logout(){
+  localStorage.removeItem("userEmail");
+  location.reload();
+}
+
+// ===== Dropdown =====
+document.getElementById("menuBtn").onclick = () => {
+  document.getElementById("menuDropdown").classList.toggle("hidden");
+};
+
+// ===== Modal Helpers =====
+function openModal(contentHTML){
+  document.getElementById("modalBody").innerHTML = contentHTML;
+  document.getElementById("modal").classList.remove("hidden");
+}
+function closeModal(){
+  document.getElementById("modal").classList.add("hidden");
+}
+
+// ===== Profile =====
+function openProfile(){
+  const email = localStorage.getItem("userEmail") || "Unknown";
+  openModal(`
+    <h2>👤 Profile</h2>
+    <p><b>Email:</b> ${email}</p>
+    <p><b>Username:</b> Student-${email.split("@")[0]}</p>
+    <button onclick="alert('Change password coming soon!')">Change Password</button>
+  `);
+}
+
+// ===== App Setting =====
+function openAppSetting(){
+  openModal(`
+    <h2>⚙️ App Setting</h2>
+    <label><input type="checkbox" checked> Dark Mode</label><br><br>
+    <label><input type="checkbox"> Notifications</label><br><br>
+    <button onclick="alert('Settings saved!')">Save</button>
+  `);
+}
+
+// ===== VIP Membership =====
+function openVIP(){
+  openModal(`
+    <h2>⭐ VIP Membership</h2>
+    <p>Benefits:</p>
+    <ul>
+      <li>✔️ Unlimited Exam Access</li>
+      <li>✔️ Detailed Results & Analytics</li>
+      <li>✔️ Exclusive Study Materials</li>
+    </ul>
+    <p><i>Upgrade option will be added soon.</i></p>
+  `);
+}
+
+// ===== Promo Code =====
+function openPromo(){
+  openModal(`
+    <h2>🎁 Promo Code</h2>
+    <input type="text" id="promoInput" placeholder="Enter promo code">
+    <button onclick="applyPromo()">Apply</button>
+    <p id="promoMsg"></p>
+  `);
+}
+function applyPromo(){
+  const code = document.getElementById("promoInput").value.trim();
+  const msg = document.getElementById("promoMsg");
+  if(code.toUpperCase() === "FYE2025"){
+    msg.innerHTML = "✅ Promo applied! You got FREE VIP Access 🎉";
+  }else{
+    msg.innerHTML = "❌ Invalid promo code.";
+  }
+}
+
+
+  // Grade → Subjects Mapping
+  const subjectsByGrade = {
+    "1-5": ["Myanmar","English","Maths","Science","Social Studies"],
+    "6-9": ["Myanmar","English","Maths","Science","Geography","History"],
+    "10-12": ["Myanmar","English","Maths","Chemistry","Physic","Biology","Ecology","Social Science"]
+  };
+
+  // Completed subjects
+  let completedSubjects = {};
+
+  
+
+  // --- Show Page Helper ---
+  function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId).classList.add("active");
+  }
+
+  // --- Generate Grade Boxes ---
+  const gradeGrid = document.getElementById("gradeGrid");
+  for(let i=1; i<=12; i++) {
+    const div = document.createElement("div");
+    div.className = "box";
+    div.innerText = "Grade-" + i;
+    div.onclick = () => chooseGrade(i);
+    gradeGrid.appendChild(div);
+  }
+
+  // --- Choose Grade ---
+  function chooseGrade(grade) {
+    let subjects = [];
+    if(grade >=1 && grade <=5) subjects = subjectsByGrade["1-5"];
+    if(grade >=6 && grade <=9) subjects = subjectsByGrade["6-9"];
+    if(grade >=10 && grade <=12) subjects = subjectsByGrade["10-12"];
+
+    const subjectGrid = document.getElementById("subjectGrid");
+    subjectGrid.innerHTML = "";
+    document.getElementById("subjectTitle").innerText = `Grade-${grade} Subjects`;
+
+    subjects.forEach(sub => {
+      const div = document.createElement("div");
+      div.className = "box";
+      div.innerText = sub;
+
+      if(completedSubjects[`${grade}-${sub}`]) {
+        div.classList.add("completed");
+      }
+
+      div.onclick = () => openForm(grade, sub, div);
+      subjectGrid.appendChild(div);
+    });
+
+    showPage("subjectPage");
+  }
+
+  // --- Open Google Form ---
+function openForm(grade, subject, boxElement) {
+  let formUrl = "";
+
+  // Grade 1 - 5 subjects
+  if (grade >= 1 && grade <= 5) {
+    if (subject === "Myanmar") {
+      formUrl = "https://forms.gle/qwhSu6eA2UbkRzxG6";
+    } else if (subject === "English") {
+      formUrl = "https://forms.gle/qwhSu6eA2UbkRzxG6";
+    } else if (subject === "Maths") {
+      formUrl = "https://forms.gle/qwhSu6eA2UbkRzxG6";
+    } else if (subject === "Science") {
+      formUrl = "https://forms.gle/qwhSu6eA2UbkRzxG6";
+    } else if (subject === "Social Studies") {
+      formUrl = "https://forms.gle/qwhSu6eA2UbkRzxG6";
+    }
+  }
+
+  // Grade 6 - 9 subjects
+  else if (grade >= 6 && grade <= 9) {
+    if (subject === "Myanmar") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G6to9_MYANMAR";
+    } else if (subject === "English") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G6to9_ENGLISH";
+    } else if (subject === "Maths") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G6to9_MATHS";
+    } else if (subject === "Science") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G6to9_SCIENCE";
+    } else if (subject === "Geography") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G6to9_GEOGRAPHY";
+    } else if (subject === "History") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G6to9_HISTORY";
+    }
+  }
+
+  // Grade 10 - 12 subjects
+  else if (grade >= 10 && grade <= 12) {
+    if (subject === "Myanmar") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G10to12_MYANMAR";
+    } else if (subject === "English") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G10to12_ENGLISH";
+    } else if (subject === "Maths") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G10to12_MATHS";
+    } else if (subject === "Chemistry") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G10to12_CHEMISTRY";
+    } else if (subject === "Physic") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G10to12_PHYSICS";
+    } else if (subject === "Biology") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G10to12_BIOLOGY";
+    } else if (subject === "Ecology") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G10to12_ECOLOGY";
+    } else if (subject === "Social Science") {
+      formUrl = "https://forms.gle/FORM_LINK_FOR_G10to12_SOCIAL";
+    }
+  }
+function startTimer(duration, display) {
+    let timer = duration, hours, minutes, seconds;
+    const interval = setInterval(() => {
+        hours = parseInt(timer / 3600, 10);
+        minutes = parseInt((timer % 3600) / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        hours = hours < 10 ? "0" + hours : hours;
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = hours + ":" + minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            clearInterval(interval);
+            display.textContent = "⏰ Time’s up!";
+            // အချိန်ကုန်ရင် iframe disable လုပ်ချင်ရင် ↓
+            document.getElementById("formFrame").style.pointerEvents = "none";
+        }
+    }, 1000);
+}
+
+window.onload = function () {
+    let threeHours = 60 * 60 * 3; // 3 hours
+    let display = document.getElementById("timer");
+    startTimer(threeHours, display);
+};
+
+
+
+  // --- set the form link into iframe ---
+  document.getElementById("formFrame").src = formUrl;
+
+  // --- change color when clicked ---
+  boxElement.style.backgroundColor = "#007bff";
+  boxElement.style.color = "#fff";
+
+    // Prevent leaving until form is submitted
+    window.onbeforeunload = () => "Please finish the test before leaving.";
+
+    // Simulate marking subject completed after submit (manual trigger)
+    const checkInterval = setInterval(() => {
+      try {
+        const iframeDoc = document.getElementById("formFrame").contentDocument;
+        const submitBtn = iframeDoc.querySelector("div[role='button']");
+        if(!submitBtn) {
+          // Form submitted (Google replaces content)
+          completedSubjects[`${grade}-${subject}`] = true;
+          boxElement.classList.add("completed");
+          clearInterval(checkInterval);
+          window.onbeforeunload = null; // allow exit
+        }
+      } catch(e) {}
+    }, 2000);
+  }
+</script>
+<script>
+/** ===== Grading Rules (ပြင်ချင်ရင် ဒီနေရာ) =====
+ * percent >= 80 => A
+ * 70-79 => B, 60-69 => C, 50-59 => D, <50 => F
+ */
+const GRADING_TABLE = [
+  { min: 90, letter: 'A+', remark: 'Excellent performance 🎉' },
+  { min: 80, letter: 'A', remark: 'Good job! Keep it up 👍' },
+  { min: 70, letter: 'B+', remark: 'Fair. You can do better.' },
+  { min: 60, letter: 'B', remark: 'Pass. Review recommended.' },
+  { min: 50,  letter: 'C', remark: 'Try again. Don’t give up! 💪' },
+  { min: 40,  letter: 'D', remark: 'Try again. Don’t give up! 💪' },
+];
+
+function computeGrade(percent){
+  for(const row of GRADING_TABLE){
+    if(percent >= row.min) return row;
+  }
+  return GRADING_TABLE[GRADING_TABLE.length-1];
+}
+
+/** Result card ကို update */
+function showResultUI({subject, raw, total}){
+  const pct = Math.round((Number(raw)/Number(total))*100);
+  const g = computeGrade(pct);
+
+  // Fill UI
+  document.getElementById('resultCard').classList.remove('hidden');
+  document.getElementById('resSubject').textContent = subject;
+  document.getElementById('resRaw').textContent = `Score: ${raw} / ${total}`;
+  document.getElementById('resPct').textContent = `Percent: ${pct}%`;
+  const gradeEl = document.getElementById('resGrade');
+  gradeEl.textContent = `Grade: ${g.letter}`;
+  gradeEl.classList.remove('grade-A','grade-B','grade-C','grade-D','grade-F');
+  gradeEl.classList.add(`grade-${g.letter}`);
+  document.getElementById('resRemark').textContent = g.remark;
+}
+</script>
+<script>
+/**
+ * openForm(grade, subject, boxElement)
+ * - Google Form ကို iframe ထဲ ဖွင့်ရအောင်
+ * - Submit ပြီးတာ detect → result UI ပြ
+ * - (Auto) score ယူလို့မရတဲ့အတွက် နည်းလမ်း 2 ခုထောက်ပံ့:
+ *   1) URL parameter (score, total) — Apps Script redirect နဲ့ တန်းထည့်နိုင်
+ *   2) Manual prompt fallback — admin/testing အတွက်
+ */
+function openForm(grade, subject, boxElement) {
+  const iframe = document.getElementById("formFrame");
+  document.getElementById("resultCard").classList.add("hidden"); // clear old result
+ // iframe.src = "https://forms.gle/EfMcayTv2AweiqhU8";
+ // iframe.src = "https://forms.gle/qwhSu6eA2UbkRzxG6";
+  
+
+  // Leave-guard
+  window.onbeforeunload = () => "Please finish the test before leaving.";
+
+  // 👉 Submit detect (Google Form confirmation page သို့ပြန်သွားသလိုဖြစ်တဲ့ အချိန်)
+  const checkInterval = setInterval(() => {
+    try{
+      const win = iframe.contentWindow;
+      const href = win.location.href;
+
+      // Google Forms မှာ submit ပြီးရင် URL ထဲမှာ 'formResponse' ပါ၊ or viewform?pli=1&… ပြောင်းတတ်
+      if (href.includes("formResponse")) {
+        clearInterval(checkInterval);
+        window.onbeforeunload = null; // allow leaving
+
+        // --- Option A: URL Parameters (Recommended)
+        // Apps Script redirect ကနေ ?score=18&total=20 လိုပေးထားပါက ဒီကနေ တန်းဖတ်နိုင်
+        const qs = new URLSearchParams(window.location.search);
+        let raw  = qs.get('score');
+        let total = qs.get('total');
+
+        // --- Option B: Manual Fallback (testing/admin)
+        if(!raw || !total){
+          const manual = prompt(`✅ Submitted!\nEnter your score (formats: 18/20 or just 90 for 90%):`, "");
+          if(manual){
+            if(manual.includes("/")){
+              const [r,t] = manual.split("/").map(s=>s.trim());
+              raw = r; total = t || 100;
+            }else{
+              // user provided percent
+              raw = Number(manual);
+              total = 100;
+            }
+          }
+        }
+
+        if(raw && total){
+          showResultUI({subject, raw, total});
+          // Subject box ကို completed အဖြစ်အပြာပြောင်း
+          if (typeof completedSubjects !== 'undefined'){
+            completedSubjects[`${grade}-${subject}`] = true;
+          }
+          boxElement.classList.add("completed");
+        }else{
+          // score မရခဲ့သေးရင် Result card မပြ
+          console.warn("Score not provided.");
+        }
+      }
+    }catch(e){
+      // cross-origin read errors while form loading — ignore
+    }
+  }, 1500);
+}
+</script>
+<script>
+// ===== User Data Store =====
+let users = JSON.parse(localStorage.getItem("allUsers") || "[]");
+
+// ===== Login =====
+function login(){
+  const email = document.getElementById("email").value;
+  const pass  = document.getElementById("password").value;
+
+  if(email.endsWith("@gmail.com") && pass.trim() !== ""){
+    // Save session
+    localStorage.setItem("userEmail", email);
+    localStorage.setItem("userPass", pass); 
+    localStorage.setItem("hasVIP", "false"); // default no VIP
+    document.getElementById("appHeader").classList.remove("hidden");
+    showPage("gradePage");
+
+    // Save new user
+    const username = "Student-" + email.split("@")[0];
+    if(!users.find(u=>u.email === email)){
+      users.push({name: username, email: email, password: pass, photo:""});
+      localStorage.setItem("allUsers", JSON.stringify(users));
+    }
+  }else{
+    document.getElementById("loginError").style.display = "block";
+  }
+}
+
+// ===== Logout =====
+function logout(){
+  localStorage.removeItem("userEmail");
+  localStorage.removeItem("userPass");
+  location.reload();
+}
+
+// ===== Session Restore =====
+window.onload = () => {
+  const user = localStorage.getItem("userEmail");
+  if(user){
+    document.getElementById("appHeader").classList.remove("hidden");
+    showPage("gradePage");
+  }
+};
+
+// ===== Modal Helpers =====
+function openModal(contentHTML){
+  document.getElementById("modalBody").innerHTML = contentHTML;
+  document.getElementById("modal").classList.remove("hidden");
+}
+function closeModal(){
+  document.getElementById("modal").classList.add("hidden");
+}
+
+// ===== Profile =====
+function openProfile(){
+  const email = localStorage.getItem("userEmail") || "Unknown";
+  const user = users.find(u=>u.email===email);
+
+  openModal(`
+    <h2>👤 Profile</h2>
+    <p><b>Email:</b> ${email}</p>
+    <p><b>Username:</b> Student-${email.split("@")[0]}</p>
+    <p>
+      <img src="${user?.photo || 'https://via.placeholder.com/100'}" 
+           style="width:100px;height:100px;border-radius:50%">
+    </p>
+    <input type="file" accept="image/*" onchange="uploadPhoto(event)">
+    <br><br>
+    <input type="password" id="newPass" placeholder="Enter new password">
+    <button onclick="changePassword()">Change Password</button>
+  `);
+}
+
+function uploadPhoto(event){
+  const email = localStorage.getItem("userEmail");
+  const file = event.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const user = users.find(u=>u.email===email);
+      if(user){
+        user.photo = e.target.result;
+        localStorage.setItem("allUsers", JSON.stringify(users));
+        alert("Profile photo updated!");
+        openProfile();
+      }
+    }
+    reader.readAsDataURL(file);
+  }
+}
+
+function changePassword(){
+  const email = localStorage.getItem("userEmail");
+  const newPass = document.getElementById("newPass").value.trim();
+  if(newPass){
+    const user = users.find(u=>u.email===email);
+    if(user){
+      user.password = newPass;
+      localStorage.setItem("allUsers", JSON.stringify(users));
+      localStorage.setItem("userPass", newPass);
+      alert("Password changed successfully!");
+    }
+  }
+}
+
+// ===== App Setting =====
+function openAppSetting(){
+  openModal(`
+    <h2>⚙️ App Setting</h2>
+    <label><input type="checkbox" checked> Dark Mode</label><br><br>
+    <label><input type="checkbox"> Notifications</label><br><br>
+    <button onclick="alert('Settings saved!')">Save</button>
+  `);
+}
+
+// ===== VIP Membership =====
+function openVIP(){
+  openModal(`
+    <h2>⭐ VIP Membership</h2>
+    <p>Benefits:</p>
+    <ul>
+      <li>✔️ Unlimited Exam Access</li>
+      <li>✔️ Detailed Results & Analytics</li>
+      <li>✔️ Exclusive Study Materials</li>
+    </ul>
+    <p><i>Upgrade option will be added soon.</i></p>
+  `);
+}
+
+// ===== Promo Code =====
+function openPromo(){
+  openModal(`
+    <h2>🎁 Promo Code</h2>
+    <input type="text" id="promoInput" placeholder="Enter promo code">
+    <button onclick="applyPromo()">Apply</button>
+    <p id="promoMsg"></p>
+  `);
+}
+
+function applyPromo(){
+  const code = document.getElementById("promoInput").value.trim();
+  const msg = document.getElementById("promoMsg");
+  if(code.toUpperCase() === "FYE2025"){
+    msg.innerHTML = "✅ Promo applied! You got FREE VIP Access 🎉";
+    localStorage.setItem("hasVIP","true");
+  }else{
+    msg.innerHTML = "❌ Invalid promo code.";
+  }
+}
+
+// ===== Restrict Access If No Promo =====
+document.addEventListener("click", function(e){
+  const hasVIP = localStorage.getItem("hasVIP") === "true";
+  if(!hasVIP){
+    // allow only header menu buttons
+    const allowed = e.target.closest("#appHeader, #menuDropdown, #modal, .modal, button, input");
+    if(!allowed){
+      e.preventDefault();
+      e.stopPropagation();
+      alert("🚫 You must enter Promo Code to unlock this Test Center .");
+    }
+  }
+}, true);
+</script>
+
+<script>
+// --- Store all users in memory ---
+let user = JSON.parse(localStorage.getItem("allUsers") || "[]");
+
+// === Login Function (Update with save to CSV) ===
+function login(){
+  const email = document.getElementById("email").value;
+  const pass  = document.getElementById("password").value;
+
+  if(email.endsWith("@gmail.com") && pass.trim() !== ""){
+    // Save session
+    localStorage.setItem("userEmail", email);
+    document.getElementById("appHeader").classList.remove("hidden");
+    showPage("gradePage");
+
+    // === Add new user to array ===
+    const username = "Student-" + email.split("@")[0];
+    users.push({name: username, email: email});
+    localStorage.setItem("allUsers", JSON.stringify(users));
+
+    // === Export CSV Auto ===
+    exportCSV(users);
+
+  }else{
+    document.getElementById("loginError").style.display = "block";
+  }
+}
+
+// === CSV Export Helper ===
+function exportCSV(data){
+  let csv = "Name,Email\n";
+  data.forEach(u => {
+    csv += `${u.name},${u.email}\n`;
+  });
+
+  // Create a downloadable blob
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  // Trigger download
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "user_accounts.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+
+
+</body>
+</html>
